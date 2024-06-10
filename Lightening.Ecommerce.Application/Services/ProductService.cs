@@ -42,25 +42,32 @@ namespace Lightening.Ecommerce.Application.Services
 
             var filteredQuery = query
                 .Where(m => m.ProductModelId.HasValue)
-                .Include(m => m.ProductModel)
-                .ThenInclude(m => m.ProductModelProductDescriptionCultures)
-                .ThenInclude(m => m.ProductDescription)
                 .Include(m => m.ProductProductPhotos)
                 .GroupBy(m => m.ProductModelId)
                 .Select(p => p.OrderBy(m => m.ProductId).FirstOrDefault());
 
-            var totalCount = filteredQuery.AsEnumerable().Count();
+            var totalCount = filteredQuery.AsNoTracking().AsEnumerable().Count();
 
             if (request.Page.HasValue && request.PageSize.HasValue)
                 filteredQuery = filteredQuery.Skip((request.Page.Value - 1) * request.PageSize.Value).Take(request.PageSize.Value);
 
             var products = await filteredQuery.ToListAsync();
 
+            var productModelids = products.Select(m => m.ProductModelId).Distinct().ToList();
+            var productModels = await _repository.ProductModel
+                .AsQueryable()
+                .Where(m => productModelids.Contains(m.ProductModelId))
+                .Include(m => m.ProductModelProductDescriptionCultures)
+                .ThenInclude(m => m.ProductDescription)
+                .AsNoTracking()
+                .ToListAsync();
+
+
             var data = products.Select(p => new ProductModelSummaryDto
             {
                 ProductModelId = p.ProductModelId.Value,
-                Description = p.ProductModel?.ProductModelProductDescriptionCultures?.FirstOrDefault()?.ProductDescription?.Description,
-                Name = p.ProductModel?.Name,
+                Description = ProductModelDescrption(p.ProductModelId.Value),
+                Name = FindProductModel(p.ProductModelId.Value).Name,
                 ProductThumbnailId = p.ProductProductPhotos?.FirstOrDefault()?.ProductPhotoId,
                 ProductListPrice = p.ListPrice
             }).ToArray();
@@ -72,6 +79,12 @@ namespace Lightening.Ecommerce.Application.Services
                 PageSize = request.PageSize.Value,
                 TotalCount = totalCount
             };
+
+            ProductModel FindProductModel(int productModelId)
+                => productModels.FirstOrDefault(m => m.ProductModelId == productModelId);
+
+            string ProductModelDescrption(int productModelId)
+                => FindProductModel(productModelId).ProductModelProductDescriptionCultures?.FirstOrDefault()?.ProductDescription?.Description;
         }
 
         public async Task<byte[]?> GetProductThumbnailAsync(int photoId)
