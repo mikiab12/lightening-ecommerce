@@ -9,7 +9,6 @@ export const useWeatherStore = defineStore('weather', {
     async fetchWeatherData() {
       const { data } = await weatherService.getWeatherData()
       this.weather = data
-      console.log(data)
     }
   }
 })
