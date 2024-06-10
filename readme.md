@@ -1,4 +1,3 @@
-```markdown
 # Lightening E-commerce Project
 
 ## Overview
@@ -58,4 +57,7 @@ This project is a comprehensive e-commerce application with a robust backend and
     dotnet run
     ```
 
-```
+## Additional Notes
+
+- Ensure that all services are running properly and that the front end can communicate with the backend API.
+- Make sure to keep your API keys and connection strings secure and not hard-code them in your source files.
