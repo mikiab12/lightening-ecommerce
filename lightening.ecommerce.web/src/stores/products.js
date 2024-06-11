@@ -29,7 +29,6 @@ export const useProductsStore = defineStore('products', {
       this.loadingProducts = false
     },
     async fetchProduct(id) {
-      this.$state.loadingProductDetail = true
       const { data: result } = await productService.getProductDetail(id)
       this.product = result
       this.loadingProductDetail = false
