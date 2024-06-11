@@ -10,12 +10,18 @@ export const useProductsStore = defineStore('products', {
     loadingProducts: false,
     product: null,
     loadingProductDetail: true,
-    currentProduct: null
+    currentProduct: null,
+    categories: []
   }),
   actions: {
-    async fetchProducts(page) {
+    async fetchProducts(page, categoryId, subCategoryId) {
       this.loadingProducts = true
-      const { data: result } = await productService.getProductsSummary(page, this.$state.pageSize)
+      const { data: result } = await productService.getProductsSummary(
+        page,
+        this.$state.pageSize,
+        categoryId,
+        subCategoryId
+      )
       this.products = result.data
       this.totalCount = result.totalCount
       this.currentPage = result.currentPage
@@ -28,6 +34,10 @@ export const useProductsStore = defineStore('products', {
       this.product = result
       this.loadingProductDetail = false
       this.currentProduct = result.products[0]
+    },
+    async fetchCategories() {
+      const { data: result } = await productService.getProductCategories()
+      this.categories = result
     }
   }
 })

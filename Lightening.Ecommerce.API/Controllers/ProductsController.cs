@@ -31,7 +31,7 @@ namespace Lightening.Ecommerce.API.Controllers
             return Ok(product);
         }
 
-        [HttpGet("catgories")]
+        [HttpGet("categories")]
         public async Task<IActionResult> GetProductCategories()
         {
             var result = await _productService.GetAllProductCategoriesAsync();
@@ -42,6 +42,7 @@ namespace Lightening.Ecommerce.API.Controllers
         public async Task<IActionResult> GetProductThumbnailAsync(int photoId)
         {
             var result = await _productService.GetProductThumbnailAsync(photoId);
+            if (result == null) return NotFound();
             return File(result, "image/gif");
         }
 
@@ -49,6 +50,7 @@ namespace Lightening.Ecommerce.API.Controllers
         public async Task<IActionResult> GetProductLargePhotoAsync(int photoId)
         {
             var result = await _productService.GetProductLargePhotoAsync(photoId);
+            if (result == null) return NotFound();
             return File(result, "image/gif");
         }
     }

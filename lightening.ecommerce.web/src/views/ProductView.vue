@@ -1,8 +1,9 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useProductsStore } from '../stores/products'
 import { storeToRefs } from 'pinia'
+
+import { useProductsStore } from '../stores/products'
 
 import ProductDetailTable from '../components/Product/ProductDetailTable.vue'
 
@@ -22,8 +23,8 @@ onMounted(async () => {
 
 <template class="product-details">
   <v-container class="product-details-container" v-if="!loadingProductDetail && product">
-    <v-row class="product-details">
-      <v-col cols="6">
+    <v-row class="product-details" justify="center">
+      <v-col cols="12" sm="12" md="6" lg="4">
         <v-card variant="elevated" height="550">
           <div>
             <v-img
@@ -37,7 +38,7 @@ onMounted(async () => {
           </div>
         </v-card>
       </v-col>
-      <v-col cols="6">
+      <v-col cols="12" sm="12" md="6" lg="4">
         <v-select
           v-model="currentProduct"
           :items="product.products"
@@ -58,7 +59,9 @@ onMounted(async () => {
 <style>
 .product-details {
   background-color: #eceff7 !important;
-  margin-top: 50px !important;
+  height: 100%;
+}
+.product-details-container {
   height: 100%;
 }
 </style>

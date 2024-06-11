@@ -1,27 +1,48 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, watch, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+
 import ProductListing from '../components/Product/ProductListing.vue'
 import ProductListSkeleton from '../components/Product/ProductListSkeleton.vue'
 
 import { useProductsStore } from '../stores/products'
-import { storeToRefs } from 'pinia'
-import { watch } from 'vue'
 
 const productStore = useProductsStore()
 const { totalCount, products, currentPage, pageSize, loadingProducts } = storeToRefs(productStore)
 const { fetchProducts } = productStore
 
+const startItem = computed(() => {
+  return (currentPage.value - 1) * pageSize.value + 1
+})
+
+const endItem = computed(() => {
+  return Math.min(currentPage.value * pageSize.value, totalCount.value)
+})
+
+const route = useRoute()
+
 onMounted(() => {
-  if (products.value.length == 0) fetchProducts(currentPage.value)
+  const { categoryId, subcategoryId } = route.params
+  fetchProducts(currentPage.value, categoryId, subcategoryId)
 })
 
 watch(currentPage, async (newPage) => {
-  fetchProducts(newPage)
+  const { categoryId, subcategoryId } = route.params
+  fetchProducts(newPage, categoryId, subcategoryId)
+})
+
+watch(route, async (newRoute) => {
+  const { categoryId, subcategoryId } = newRoute.params
+  fetchProducts(1, categoryId, subcategoryId)
 })
 </script>
 <template class="product-listings">
   <ProductListSkeleton v-if="loadingProducts" />
-  <v-container class="product-container">
+  <v-container class="product-container product-listings">
+    <v-row justify="center">
+      <span>{{ startItem }} to {{ endItem }} of {{ totalCount }} Items</span>
+    </v-row>
     <v-row
       class="product-listings"
       align="start"
@@ -31,7 +52,7 @@ watch(currentPage, async (newPage) => {
         <ProductListing :product="product" />
       </v-col>
     </v-row>
-    <v-row>
+    <v-row justify="center">
       <div class="text-center">
         <v-pagination
           v-model="currentPage"
@@ -45,6 +66,5 @@ watch(currentPage, async (newPage) => {
 <style>
 .product-listings {
   background-color: #eceff7 !important;
-  margin-top: 50px !important;
 }
 </style>
